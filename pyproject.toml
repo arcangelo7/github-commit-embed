@@ -1,5 +1,4 @@
 [tool.semantic_release]
-version_toml = []
-version_variables = []
+version_source = "tag"
 branch = "main"
 commit_parser = "angular"
