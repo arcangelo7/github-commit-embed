@@ -1,0 +1,94 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    if: contains(github.event.head_commit.message, '[release]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install python-semantic-release
+        run: pip install python-semantic-release
+
+      - run: npm ci
+
+      - name: Calculate next version
+        id: version
+        run: |
+          NEXT_VERSION=$(semantic-release version --print)
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "No version bump needed"
+            exit 1
+          fi
+          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update version files
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+
+          # Update package.json
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json'));
+            pkg.version = '$VERSION';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, '\t') + '\n');
+          "
+
+          # Update manifest.json
+          node -e "
+            const fs = require('fs');
+            const manifest = JSON.parse(fs.readFileSync('manifest.json'));
+            manifest.version = '$VERSION';
+            fs.writeFileSync('manifest.json', JSON.stringify(manifest, null, '\t') + '\n');
+          "
+
+          # Update versions.json
+          node -e "
+            const fs = require('fs');
+            const versions = JSON.parse(fs.readFileSync('versions.json'));
+            const manifest = JSON.parse(fs.readFileSync('manifest.json'));
+            versions['$VERSION'] = manifest.minAppVersion;
+            fs.writeFileSync('versions.json', JSON.stringify(versions, null, '\t') + '\n');
+          "
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json manifest.json versions.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git push
+
+      - name: Create tag and release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --generate-notes \
+            main.js manifest.json
