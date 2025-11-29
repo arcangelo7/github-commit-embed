@@ -20,8 +20,6 @@ class CommitEmbedModal extends Modal {
 	private url: string;
 	private editor: Editor;
 	private commitData: CommitData | null = null;
-	private loading = true;
-	private error: string | null = null;
 
 	constructor(app: import('obsidian').App, url: string, editor: Editor) {
 		super(app);
@@ -41,12 +39,9 @@ class CommitEmbedModal extends Modal {
 
 		try {
 			this.commitData = await this.fetchCommit(this.url);
-			this.loading = false;
 			this.renderPreview(previewContainer);
 		} catch (err) {
-			this.loading = false;
-			this.error = (err as Error).message;
-			previewContainer.setText(`Error: ${this.error}`);
+			previewContainer.setText(`Error: ${(err as Error).message}`);
 		}
 
 		this.renderButtons(contentEl);
