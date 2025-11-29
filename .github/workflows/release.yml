@@ -17,28 +17,49 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install python-semantic-release
-        run: pip install python-semantic-release
 
       - run: npm ci
 
       - name: Calculate next version
         id: version
         run: |
-          NEXT_VERSION=$(semantic-release version --print)
-          if [ -z "$NEXT_VERSION" ]; then
-            echo "No version bump needed"
-            exit 1
+          # Get last tag version or default to 0.0.0
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          echo "Last tag: $LAST_TAG"
+
+          # Get commits since last tag
+          if [ "$LAST_TAG" = "0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"%s")
+          else
+            COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%s")
           fi
-          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "Commits since last tag:"
+          echo "$COMMITS"
+
+          # Parse version
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LAST_TAG"
+
+          # Determine version bump based on conventional commits
+          if echo "$COMMITS" | grep -qE "^[a-z]+(\(.+\))?!:|BREAKING CHANGE"; then
+            echo "Found breaking change, bumping major"
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif echo "$COMMITS" | grep -qE "^feat(\(.+\))?:"; then
+            echo "Found feature, bumping minor"
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            echo "Bumping patch"
+            PATCH=$((PATCH + 1))
+          fi
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Update version files
         run: |
