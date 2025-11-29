@@ -1,6 +1,6 @@
 {
 	"name": "github-commit-embed",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Auto-detect GitHub commit URLs on paste and embed them as portable HTML cards",
 	"main": "main.js",
 	"scripts": {
