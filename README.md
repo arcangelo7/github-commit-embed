@@ -11,7 +11,7 @@ Embed GitHub commits as beautiful cards in your Obsidian notes. Simply paste a c
 3. A dialog appears with a preview of the commit
 4. Choose:
    - **Embed** - Insert a styled card with author, date, message, and stats
-   - **Paste as text** - Insert the plain URL
+   - **Paste as text** - Insert the plain URL 
    - **Cancel** - Do nothing
 
 The embedded card is pure HTML with inline styles, so it renders correctly everywhere - even in other Markdown viewers or when exporting notes.
