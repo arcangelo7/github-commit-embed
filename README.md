@@ -1,51 +1,39 @@
 # GitHub Commit Embed
 
-Obsidian plugin that auto-detects GitHub commit URLs when you paste them and offers to embed them as portable HTML cards.
+Embed GitHub commits as beautiful cards in your Obsidian notes. Simply paste a commit URL and choose to embed it as a styled card.
 
-## Features
+![Screenshot](screenshot.png)
 
-- **Auto-detection**: When you paste a GitHub commit URL, a modal appears asking if you want to embed it
-- **Portable HTML**: The embed is pure HTML with inline styles, so it renders correctly even without the plugin (in any Markdown viewer)
-- **Full commit message**: The complete commit message is preserved with Markdown formatting (lists, bold, code, etc.)
-- **Commit metadata**: Shows author avatar, name, date, additions/deletions stats, and link to the commit
+## How it works
 
-## Usage
+1. Copy a GitHub commit URL (e.g., `https://github.com/arcangelo7/github-commit-embed/commit/37f48bffd26329505282d72c1e1ab8298fdc438c`)
+2. Paste it in any note
+3. A dialog appears with a preview of the commit
+4. Choose:
+   - **Embed** - Insert a styled card with author, date, message, and stats
+   - **Paste as text** - Insert the plain URL
+   - **Cancel** - Do nothing
 
-1. Copy a GitHub commit URL (e.g., `https://github.com/owner/repo/commit/abc123`)
-2. Paste it in any Obsidian note
-3. A modal appears with a preview of the commit
-4. Click **Embed** to insert the HTML card, **Paste as text** to insert the plain URL, or **Cancel** to abort
+The embedded card is pure HTML with inline styles, so it renders correctly everywhere - even in other Markdown viewers or when exporting notes.
 
 ## Installation
 
+### From community plugins
+
+1. Open Settings > Community plugins
+2. Click "Browse" and search for "GitHub Commit Embed"
+3. Click "Install", then "Enable"
+
 ### Manual installation
 
-1. Download `main.js` and `manifest.json` from the [latest release](https://github.com/arcangelo7/github-commit-embed/releases)
-2. Create a folder `github-commit-embed` in your vault's `.obsidian/plugins/` directory
-3. Copy `main.js` and `manifest.json` into the folder
-4. Enable the plugin in Obsidian settings (Settings > Community plugins)
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/arcangelo7/github-commit-embed/releases)
+2. Create folder `.obsidian/plugins/github-commit-embed/` in your vault
+3. Copy the downloaded files into the folder
+4. Enable the plugin in Settings > Community plugins
 
-### From source
+## Network usage
 
-```bash
-git clone https://github.com/arcangelo7/github-commit-embed
-cd github-commit-embed
-npm install
-npm run build
-```
-
-Then copy or symlink the folder to your vault's `.obsidian/plugins/` directory.
-
-## Development
-
-```bash
-npm run dev    # Watch mode, auto-rebuild on changes
-npm run build  # Production build
-```
-
-## Limitations
-
-- GitHub API rate limit: 60 requests/hour without authentication. For heavy usage, a future version may add support for GitHub personal access tokens.
+This plugin fetches commit data from the **GitHub API** (`api.github.com`) when you paste a commit URL. No data is sent except the commit URL you're embedding. GitHub's API has a rate limit of 60 requests per hour for unauthenticated requests.
 
 ## License
 

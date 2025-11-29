@@ -1,0 +1,66 @@
+.github-commit-modal-buttons {
+	display: flex;
+	gap: 8px;
+	margin-top: 16px;
+	justify-content: flex-end;
+}
+
+.github-commit-card {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 16px;
+	margin: 8px 0;
+	background: var(--background-primary);
+}
+
+.github-commit-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.github-commit-avatar {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+}
+
+.github-commit-author-info {
+	display: flex;
+	flex-direction: column;
+}
+
+.github-commit-date {
+	font-size: 0.85em;
+	color: var(--text-muted);
+}
+
+.github-commit-message {
+	margin: 12px 0;
+}
+
+.github-commit-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.85em;
+}
+
+.github-commit-additions {
+	font-family: var(--font-monospace);
+	color: var(--color-green);
+	font-weight: 600;
+}
+
+.github-commit-deletions {
+	font-family: var(--font-monospace);
+	color: var(--color-red);
+	font-weight: 600;
+}
+
+.github-commit-sha {
+	color: var(--text-accent);
+	text-decoration: none;
+	font-weight: 500;
+}

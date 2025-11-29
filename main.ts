@@ -51,19 +51,55 @@ class CommitEmbedModal extends Modal {
 		if (!this.commitData) return;
 
 		container.empty();
-		container.innerHTML = this.generateHtmlEmbed(this.commitData);
+		this.buildCommitCard(container, this.commitData);
+	}
+
+	private buildCommitCard(container: HTMLElement, commit: CommitData) {
+		const card = container.createDiv({ cls: 'github-commit-card' });
+
+		const header = card.createDiv({ cls: 'github-commit-header' });
+		if (commit.author.avatarUrl) {
+			header.createEl('img', {
+				cls: 'github-commit-avatar',
+				attr: { src: commit.author.avatarUrl, alt: commit.author.login }
+			});
+		}
+		const authorInfo = header.createDiv({ cls: 'github-commit-author-info' });
+		authorInfo.createEl('strong', { text: commit.author.login });
+		authorInfo.createEl('span', { text: this.formatDate(commit.date), cls: 'github-commit-date' });
+
+		const messageDiv = card.createDiv({ cls: 'github-commit-message' });
+		const sanitizedMessage = this.sanitizeHtml(marked.parse(commit.message, { async: false }) as string);
+		messageDiv.innerHTML = sanitizedMessage;
+
+		const footer = card.createDiv({ cls: 'github-commit-footer' });
+		footer.createEl('span', { text: `+${commit.stats.additions}`, cls: 'github-commit-additions' });
+		footer.createEl('span', { text: `-${commit.stats.deletions}`, cls: 'github-commit-deletions' });
+		footer.createEl('a', {
+			text: commit.sha.substring(0, 7),
+			cls: 'github-commit-sha',
+			attr: { href: commit.url }
+		});
+	}
+
+	private sanitizeHtml(html: string): string {
+		const div = document.createElement('div');
+		div.innerHTML = html;
+		div.querySelectorAll('script, iframe, object, embed, form').forEach(el => el.remove());
+		div.querySelectorAll('*').forEach(el => {
+			for (const attr of Array.from(el.attributes)) {
+				if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
+					el.removeAttribute(attr.name);
+				}
+			}
+		});
+		return div.innerHTML;
 	}
 
 	private renderButtons(contentEl: HTMLElement) {
-		const buttonContainer = contentEl.createDiv({ cls: 'commit-modal-buttons' });
-		buttonContainer.style.display = 'flex';
-		buttonContainer.style.gap = '8px';
-		buttonContainer.style.marginTop = '16px';
-		buttonContainer.style.justifyContent = 'flex-end';
+		const buttonContainer = contentEl.createDiv({ cls: 'github-commit-modal-buttons' });
 
-		const embedBtn = buttonContainer.createEl('button', { text: 'Embed' });
-		embedBtn.style.backgroundColor = 'var(--interactive-accent)';
-		embedBtn.style.color = 'var(--text-on-accent)';
+		const embedBtn = buttonContainer.createEl('button', { text: 'Embed', cls: 'mod-cta' });
 		embedBtn.onclick = () => {
 			if (this.commitData) {
 				const html = this.generateHtmlEmbed(this.commitData);
