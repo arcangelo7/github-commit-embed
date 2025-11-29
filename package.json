@@ -1,0 +1,24 @@
+{
+	"name": "github-commit-embed",
+	"version": "0.1.0",
+	"description": "Auto-detect GitHub commit URLs on paste and embed them as portable HTML cards",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+	},
+	"keywords": [],
+	"author": "Arcangelo Massari <arcangelo.massari@unibo.it>",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^16.11.6",
+		"builtin-modules": "3.3.0",
+		"esbuild": "0.17.3",
+		"obsidian": "latest",
+		"tslib": "2.4.0",
+		"typescript": "4.7.4"
+	},
+	"dependencies": {
+		"marked": "^17.0.1"
+	}
+}

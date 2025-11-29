@@ -1,0 +1,10 @@
+{
+	"id": "github-commit-embed",
+	"name": "GitHub Commit Embed",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
+	"description": "Auto-detect GitHub commit URLs on paste and embed them as portable HTML cards",
+	"author": "Arcangelo Massari",
+	"authorUrl": "mailto:arcangelo.massari@unibo.it",
+	"isDesktopOnly": false
+}
