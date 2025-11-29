@@ -35,6 +35,15 @@ The embedded card is pure HTML with inline styles, so it renders correctly every
 
 This plugin fetches commit data from the **GitHub API** (`api.github.com`) when you paste a commit URL. No data is sent except the commit URL you're embedding. GitHub's API has a rate limit of 60 requests per hour for unauthenticated requests.
 
+## Development
+
+```bash
+npm install    # Install dependencies
+npm run dev    # Watch mode with auto-rebuild
+npm run build  # Production build
+npm run lint   # Run eslint with obsidianmd plugin
+```
+
 ## License
 
 MIT

@@ -16,6 +16,26 @@ interface CommitData {
 	url: string;
 }
 
+interface GitHubCommitResponse {
+	sha: string;
+	html_url: string;
+	commit: {
+		message: string;
+		author: {
+			name: string;
+			date: string;
+		};
+	};
+	author?: {
+		login: string;
+		avatar_url: string;
+	};
+	stats?: {
+		additions: number;
+		deletions: number;
+	};
+}
+
 class CommitEmbedModal extends Modal {
 	private url: string;
 	private editor: Editor;
@@ -147,7 +167,7 @@ class CommitEmbedModal extends Modal {
 			}
 		});
 
-		const data = response.json;
+		const data = response.json as GitHubCommitResponse;
 
 		return {
 			sha: data.sha,
