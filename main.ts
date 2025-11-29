@@ -1,4 +1,4 @@
-import { Editor, Modal, Plugin } from 'obsidian';
+import { Editor, Modal, Plugin, requestUrl } from 'obsidian';
 import { marked } from 'marked';
 
 interface CommitData {
@@ -32,7 +32,7 @@ class CommitEmbedModal extends Modal {
 		contentEl.empty();
 		contentEl.addClass('github-commit-modal');
 
-		contentEl.createEl('h2', { text: 'GitHub Commit Embed' });
+		contentEl.createEl('h2', { text: 'GitHub commit embed' });
 
 		const previewContainer = contentEl.createDiv({ cls: 'commit-preview' });
 		previewContainer.setText('Loading commit...');
@@ -69,8 +69,8 @@ class CommitEmbedModal extends Modal {
 		authorInfo.createEl('span', { text: this.formatDate(commit.date), cls: 'github-commit-date' });
 
 		const messageDiv = card.createDiv({ cls: 'github-commit-message' });
-		const sanitizedMessage = this.sanitizeHtml(marked.parse(commit.message, { async: false }) as string);
-		messageDiv.innerHTML = sanitizedMessage;
+		const parsedMessage = marked.parse(commit.message, { async: false });
+		this.renderSanitizedHtml(messageDiv, parsedMessage);
 
 		const footer = card.createDiv({ cls: 'github-commit-footer' });
 		footer.createEl('span', { text: `+${commit.stats.additions}`, cls: 'github-commit-additions' });
@@ -82,18 +82,20 @@ class CommitEmbedModal extends Modal {
 		});
 	}
 
-	private sanitizeHtml(html: string): string {
-		const div = document.createElement('div');
-		div.innerHTML = html;
-		div.querySelectorAll('script, iframe, object, embed, form').forEach(el => el.remove());
-		div.querySelectorAll('*').forEach(el => {
+	private renderSanitizedHtml(container: HTMLElement, html: string | Promise<string>): void {
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(html as string, 'text/html');
+		doc.body.querySelectorAll('script, iframe, object, embed, form').forEach(el => el.remove());
+		doc.body.querySelectorAll('*').forEach(el => {
 			for (const attr of Array.from(el.attributes)) {
-				if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
+				if (attr.name.startsWith('on') || (attr.name === 'href' && attr.value.startsWith('javascript:'))) {
 					el.removeAttribute(attr.name);
 				}
 			}
 		});
-		return div.innerHTML;
+		while (doc.body.firstChild) {
+			container.appendChild(doc.body.firstChild);
+		}
 	}
 
 	private renderButtons(contentEl: HTMLElement) {
@@ -138,17 +140,14 @@ class CommitEmbedModal extends Modal {
 		}
 
 		const apiUrl = `https://api.github.com/repos/${parsed.owner}/${parsed.repo}/commits/${parsed.sha}`;
-		const response = await fetch(apiUrl, {
+		const response = await requestUrl({
+			url: apiUrl,
 			headers: {
 				'Accept': 'application/vnd.github.v3+json'
 			}
 		});
 
-		if (!response.ok) {
-			throw new Error(`GitHub API error: ${response.status}`);
-		}
-
-		const data = await response.json();
+		const data = response.json;
 
 		return {
 			sha: data.sha,
@@ -175,7 +174,7 @@ class CommitEmbedModal extends Modal {
 	}
 
 	private generateHtmlEmbed(commit: CommitData): string {
-		const messageHtml = marked.parse(commit.message, { async: false }) as string;
+		const messageHtml = marked.parse(commit.message, { async: false });
 
 		const avatarHtml = commit.author.avatarUrl
 			? `<img src="${commit.author.avatarUrl}" style="width: 32px; height: 32px; border-radius: 50%;" alt="${commit.author.login}" />`
@@ -202,7 +201,7 @@ class CommitEmbedModal extends Modal {
 }
 
 export default class GitHubCommitEmbedPlugin extends Plugin {
-	async onload() {
+	onload() {
 		this.registerEvent(
 			this.app.workspace.on('editor-paste', (evt: ClipboardEvent, editor: Editor) => {
 				const text = evt.clipboardData?.getData('text/plain')?.trim();
