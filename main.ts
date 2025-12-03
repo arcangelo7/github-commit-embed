@@ -14,6 +14,8 @@ interface CommitData {
 		deletions: number;
 	};
 	url: string;
+	owner: string;
+	repo: string;
 }
 
 interface GitHubCommitResponse {
@@ -86,7 +88,14 @@ class CommitEmbedModal extends Modal {
 		}
 		const authorInfo = header.createDiv({ cls: 'github-commit-author-info' });
 		authorInfo.createEl('strong', { text: commit.author.login });
-		authorInfo.createEl('span', { text: this.formatDate(commit.date), cls: 'github-commit-date' });
+		const metaInfo = authorInfo.createEl('span', { cls: 'github-commit-meta' });
+		metaInfo.createEl('span', { text: this.formatDate(commit.date), cls: 'github-commit-date' });
+		metaInfo.createEl('span', { text: ' · ' });
+		metaInfo.createEl('a', {
+			text: `${commit.owner}/${commit.repo}`,
+			cls: 'github-commit-repo',
+			attr: { href: `https://github.com/${commit.owner}/${commit.repo}` }
+		});
 
 		const messageDiv = card.createDiv({ cls: 'github-commit-message' });
 		const parsedMessage = marked.parse(commit.message, { async: false });
@@ -181,7 +190,9 @@ class CommitEmbedModal extends Modal {
 				additions: data.stats?.additions || 0,
 				deletions: data.stats?.deletions || 0
 			},
-			url: data.html_url
+			url: data.html_url,
+			owner: parsed.owner,
+			repo: parsed.repo
 		};
 	}
 
@@ -206,6 +217,8 @@ class CommitEmbedModal extends Modal {
     <div>
       <strong style="display: block; color: #1f2328;">${commit.author.login}</strong>
       <span style="font-size: 0.85em; color: #656d76;">${this.formatDate(commit.date)}</span>
+      <span style="font-size: 0.85em; color: #656d76;"> · </span>
+      <a href="https://github.com/${commit.owner}/${commit.repo}" style="font-size: 0.85em; color: #0969da; text-decoration: none;">${commit.owner}/${commit.repo}</a>
     </div>
   </div>
   <div style="margin: 12px 0; color: #1f2328;">
