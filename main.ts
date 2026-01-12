@@ -1,4 +1,4 @@
-import { Editor, Modal, Plugin, requestUrl } from 'obsidian';
+import { Editor, Modal, Plugin, requestUrl, MarkdownRenderer, Component } from 'obsidian';
 import { marked } from 'marked';
 
 interface CommitData {
@@ -42,6 +42,7 @@ class CommitEmbedModal extends Modal {
 	private url: string;
 	private editor: Editor;
 	private commitData: CommitData | null = null;
+	private component = new Component();
 
 	constructor(app: import('obsidian').App, url: string, editor: Editor) {
 		super(app);
@@ -61,7 +62,7 @@ class CommitEmbedModal extends Modal {
 
 		try {
 			this.commitData = await this.fetchCommit(this.url);
-			this.renderPreview(previewContainer);
+			await this.renderPreview(previewContainer);
 		} catch (err) {
 			previewContainer.setText(`Error: ${(err as Error).message}`);
 		}
@@ -69,14 +70,14 @@ class CommitEmbedModal extends Modal {
 		this.renderButtons(contentEl);
 	}
 
-	private renderPreview(container: HTMLElement) {
+	private async renderPreview(container: HTMLElement) {
 		if (!this.commitData) return;
 
 		container.empty();
-		this.buildCommitCard(container, this.commitData);
+		await this.buildCommitCard(container, this.commitData);
 	}
 
-	private buildCommitCard(container: HTMLElement, commit: CommitData) {
+	private async buildCommitCard(container: HTMLElement, commit: CommitData) {
 		const card = container.createDiv({ cls: 'github-commit-card' });
 
 		const header = card.createDiv({ cls: 'github-commit-header' });
@@ -98,8 +99,7 @@ class CommitEmbedModal extends Modal {
 		});
 
 		const messageDiv = card.createDiv({ cls: 'github-commit-message' });
-		const parsedMessage = marked.parse(commit.message, { async: false });
-		this.renderSanitizedHtml(messageDiv, parsedMessage);
+		await MarkdownRenderer.render(this.app, commit.message, messageDiv, '', this.component);
 
 		const footer = card.createDiv({ cls: 'github-commit-footer' });
 		footer.createEl('span', { text: `+${commit.stats.additions}`, cls: 'github-commit-additions' });
@@ -111,21 +111,7 @@ class CommitEmbedModal extends Modal {
 		});
 	}
 
-	private renderSanitizedHtml(container: HTMLElement, html: string | Promise<string>): void {
-		const parser = new DOMParser();
-		const doc = parser.parseFromString(html as string, 'text/html');
-		doc.body.querySelectorAll('script, iframe, object, embed, form').forEach(el => el.remove());
-		doc.body.querySelectorAll('*').forEach(el => {
-			for (const attr of Array.from(el.attributes)) {
-				if (attr.name.startsWith('on') || (attr.name === 'href' && attr.value.startsWith('javascript:'))) {
-					el.removeAttribute(attr.name);
-				}
-			}
-		});
-		while (doc.body.firstChild) {
-			container.appendChild(doc.body.firstChild);
-		}
-	}
+
 
 	private renderButtons(contentEl: HTMLElement) {
 		const buttonContainer = contentEl.createDiv({ cls: 'github-commit-modal-buttons' });
@@ -152,6 +138,7 @@ class CommitEmbedModal extends Modal {
 	}
 
 	onClose() {
+		this.component.unload();
 		const { contentEl } = this;
 		contentEl.empty();
 	}
