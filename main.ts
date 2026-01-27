@@ -192,7 +192,7 @@ class CommitEmbedModal extends Modal {
 	}
 
 	private generateHtmlEmbed(commit: CommitData): string {
-		const messageHtml = marked.parse(commit.message, { async: false });
+		const messageHtml = marked.parse(commit.message, { async: false }).trim();
 
 		const avatarHtml = commit.author.avatarUrl
 			? `<img src="${commit.author.avatarUrl}" style="width: 32px; height: 32px; border-radius: 50%;" alt="${commit.author.login}" />`
