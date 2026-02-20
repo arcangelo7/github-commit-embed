@@ -220,7 +220,7 @@ class CommitEmbedModal extends Modal {
 			'</div>',
 		];
 
-		return parts.filter(Boolean).join('\n');
+		return parts.filter(Boolean).join('');
 	}
 }
 
