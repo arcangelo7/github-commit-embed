@@ -198,25 +198,29 @@ class CommitEmbedModal extends Modal {
 			? `<img src="${commit.author.avatarUrl}" style="width: 32px; height: 32px; border-radius: 50%;" alt="${commit.author.login}" />`
 			: '';
 
-		return `<div style="border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin: 8px 0; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #1f2328;">
-  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-    ${avatarHtml}
-    <div>
-      <strong style="display: block; color: #1f2328;">${commit.author.login}</strong>
-      <span style="font-size: 0.85em; color: #656d76;">${this.formatDate(commit.date)}</span>
-      <span style="font-size: 0.85em; color: #656d76;"> · </span>
-      <a href="https://github.com/${commit.owner}/${commit.repo}" style="font-size: 0.85em; color: #0969da; text-decoration: none;">${commit.owner}/${commit.repo}</a>
-    </div>
-  </div>
-  <div style="margin: 12px 0; color: #1f2328;">
-    ${messageHtml}
-  </div>
-  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em;">
-    <span style="font-family: monospace; color: #1a7f37; font-weight: 600;">+${commit.stats.additions}</span>
-    <span style="font-family: monospace; color: #cf222e; font-weight: 600;">-${commit.stats.deletions}</span>
-    <a href="${commit.url}" style="color: #0969da; text-decoration: none; font-weight: 500;">${commit.sha.substring(0, 7)}</a>
-  </div>
-</div>`;
+		const parts = [
+			'<div style="border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin: 8px 0; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Helvetica, Arial, sans-serif; color: #1f2328;">',
+			'<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">',
+			avatarHtml,
+			'<div>',
+			`<strong style="display: block; color: #1f2328;">${commit.author.login}</strong>`,
+			`<span style="font-size: 0.85em; color: #656d76;">${this.formatDate(commit.date)}</span>`,
+			'<span style="font-size: 0.85em; color: #656d76;"> &middot; </span>',
+			`<a href="https://github.com/${commit.owner}/${commit.repo}" style="font-size: 0.85em; color: #0969da; text-decoration: none;">${commit.owner}/${commit.repo}</a>`,
+			'</div>',
+			'</div>',
+			'<div style="margin: 12px 0; color: #1f2328;">',
+			messageHtml,
+			'</div>',
+			'<div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em;">',
+			`<span style="font-family: monospace; color: #1a7f37; font-weight: 600;">+${commit.stats.additions}</span>`,
+			`<span style="font-family: monospace; color: #cf222e; font-weight: 600;">-${commit.stats.deletions}</span>`,
+			`<a href="${commit.url}" style="color: #0969da; text-decoration: none; font-weight: 500;">${commit.sha.substring(0, 7)}</a>`,
+			'</div>',
+			'</div>',
+		];
+
+		return parts.filter(Boolean).join('\n');
 	}
 }
 
